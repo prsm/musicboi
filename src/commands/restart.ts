@@ -1,7 +1,7 @@
 import { Message, Client } from 'discord.js';
 
-import { BotCommand, BotClient } from '../customInterfaces';
-import { Logger } from '../messages/logger';
+import { BotCommand } from '../customInterfaces';
+import { musicboiBot } from '../bot';
 
 export default class restartCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -18,16 +18,12 @@ export default class restartCommand implements BotCommand {
 
     private _client: Client;
 
-    private _logger: Logger;
-
-    constructor(private _botClient: BotClient) {
+    constructor(private _botClient: musicboiBot) {
         this._client = this._botClient.getClient();
-        this._logger = this._botClient.getLogger();
     }
 
     public async execute(msg: Message, args: string[], prefix: string) {
-        await this._logger.logRestart(msg);
-        await msg.delete();
+        await msg.channel.send('restarting...');
         this._client.destroy();
         process.exit();
     }

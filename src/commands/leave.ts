@@ -1,8 +1,8 @@
 import { Message, Client } from 'discord.js';
 
-import { BotCommand, BotClient } from '../customInterfaces';
+import { BotCommand } from '../customInterfaces';
 import { AudioPlayer } from '../audio/audioPlayer';
-import { Logger } from '../messages/logger';
+import { musicboiBot } from '../bot';
 
 export default class leaveCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -21,22 +21,18 @@ export default class leaveCommand implements BotCommand {
 
     private _audioPlayer: AudioPlayer;
 
-    private _logger: Logger;
-
-    constructor(private _botClient: BotClient) {
+    constructor(private _botClient: musicboiBot) {
         this._client = this._botClient.getClient();
         this._audioPlayer = this._botClient.getAudioPlayer();
-        this._logger = this._botClient.getLogger();
     }
 
     public async execute(msg: Message, args: string[], prefix: string) {
         // check if bot is in a voice channel
         if (!msg.guild.member(this._client.user).voice.channel) {
-            this._logger.logError(msg, ':no_entry_sign: I\'m not in a voice channel.');
+            msg.channel.send(':no_entry_sign: I\'m not in a voice channel.');
         } else {
             // leave voice channel and clear queue
             this._audioPlayer.leave(msg);
         }
-        msg.delete();
     }
 }

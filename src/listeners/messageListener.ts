@@ -1,5 +1,6 @@
 import { Message, Client } from 'discord.js';
-import { BotClient } from '../customInterfaces';
+
+import { musicboiBot } from '../bot';
 import config from '../config';
 
 export default class messageListener {
@@ -8,7 +9,7 @@ export default class messageListener {
 
     private _prefix: string;
 
-    constructor(private _botClient: BotClient) {
+    constructor(private _botClient: musicboiBot) {
         this._client = this._botClient.getClient();
 
         // get prefix from config
@@ -36,8 +37,7 @@ export default class messageListener {
         if (!command) return;
 
         if (command.information.admin && !(msg.author.id === config.botOwnerID)) {
-            this._botClient.getLogger().logError(msg, `:no_entry_sign: Only Jannik66 can execute this command.`);
-            msg.delete();
+            msg.channel.send(`:no_entry_sign: Only an Admin can execute this command.`);
             return;
         }
 
@@ -51,8 +51,7 @@ export default class messageListener {
             for (let example of command.information.examples) {
                 reply += `\n\`${this._prefix}${example}\``;
             }
-            this._botClient.getLogger().logError(msg, reply);
-            msg.delete();
+            msg.channel.send(reply);
             return;
         }
 

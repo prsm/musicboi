@@ -1,8 +1,8 @@
 import { Message, Collection, MessageEmbed, Client } from 'discord.js';
 
-import { BotCommand, BotClient } from '../customInterfaces';
-import { Logger } from '../messages/logger';
+import { BotCommand } from '../customInterfaces';
 import config from '../config';
+import { musicboiBot } from '../bot';
 
 export default class helpCommand implements BotCommand {
     public information: BotCommand['information'] = {
@@ -21,12 +21,9 @@ export default class helpCommand implements BotCommand {
 
     private _commands: Collection<string, BotCommand>;
 
-    private _logger: Logger;
-
-    constructor(private _botClient: BotClient) {
+    constructor(private _botClient: musicboiBot) {
         this._client = this._botClient.getClient();
         this._commands = this._botClient.getAllCommands();
-        this._logger = this._botClient.getLogger();
     }
 
     public execute(msg: Message, args: string[], prefix: string) {
@@ -68,10 +65,10 @@ export default class helpCommand implements BotCommand {
             }
 
             // send help message to log channel
-            this._sendEmbedMessage(msg, embed);
+            msg.channel.send({ embed });
         } else if (args[0]) {
             // if no command was found, send error message
-            this._sendMessage(msg, `:no_entry_sign: ${msg.author.toString()}, the command \`${args[0]}\` was not found.`);
+            msg.channel.send(`:no_entry_sign: ${msg.author.toString()}, the command \`${args[0]}\` was not found.`);
         } else {
             // set up general help message
             embed.setTitle(`Commands`);
@@ -90,25 +87,7 @@ export default class helpCommand implements BotCommand {
             for (const key in fields) {
                 embed.addField(`►${key}◄`, fields[key]);
             }
-            this._sendEmbedMessage(msg, embed);
-        }
-    }
-
-    private _sendMessage(msg: Message, text: string) {
-        if (msg.channel.id === config.textChannelID) {
-            msg.channel.send(text);
-        } else {
-            msg.delete();
-            this._logger.logText(text);
-        }
-    }
-
-    private _sendEmbedMessage(msg: Message, embed: MessageEmbed) {
-        if (msg.channel.id === config.textChannelID) {
-            msg.channel.send(embed);
-        } else {
-            msg.delete();
-            this._logger.logEmbed(embed);
+            msg.channel.send({ embed });
         }
     }
 }

@@ -2,7 +2,8 @@ import { EventEmitter } from 'events';
 
 import shuffle from 'shuffle-array';
 
-import { BotClient, QueueSong } from '../customInterfaces';
+import { QueueSong } from '../customInterfaces';
+import { musicboiBot } from '../bot';
 
 export class MusicQueue extends EventEmitter {
 
@@ -10,7 +11,7 @@ export class MusicQueue extends EventEmitter {
 
     public loop: { enabled: boolean, entireQueue: boolean } = { enabled: false, entireQueue: false };
 
-    constructor(private _botClient: BotClient) {
+    constructor(private _botClient: musicboiBot) {
         super();
     }
 

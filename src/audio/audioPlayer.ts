@@ -4,23 +4,18 @@ import { Client, Message, StreamDispatcher, VoiceConnection, VoiceChannel } from
 import * as ytdl from 'ytdl-core';
 import miniget from 'miniget';
 
-import { BotClient, QueueSong } from '../customInterfaces';
-import { StatusMessages } from '../messages/statusMessages';
-import { Logger } from '../messages/logger';
+import { QueueSong } from '../customInterfaces';
 import { MusicQueue } from './musicQueue';
 import config from '../config';
+import { musicboiBot } from '../bot';
 
 export class AudioPlayer {
 
     private _client: Client;
 
-    private _statusMessage: StatusMessages;
-
     private _connection: VoiceConnection;
 
     private _dispatcher: StreamDispatcher;
-
-    private _logger: Logger;
 
     private _musicQueue: MusicQueue;
 
@@ -28,10 +23,8 @@ export class AudioPlayer {
 
     private _skipped: boolean;
 
-    constructor(private _botClient: BotClient) {
+    constructor(private _botClient: musicboiBot) {
         this._client = this._botClient.getClient();
-        this._statusMessage = this._botClient.getStatusMessages();
-        this._logger = this._botClient.getLogger();
         this._musicQueue = this._botClient.getMusicQueue();
         this._listenToQueue();
     }
@@ -68,9 +61,9 @@ export class AudioPlayer {
         if (this._dispatcher) {
             this._skipped = true;
             this._dispatcher.end();
-            this._logger.logSkip(msg);
+            msg.channel.send('skipped.');
         } else {
-            this._logger.logError(msg, `:no_entry_sign: I'm not playing anything.`);
+            msg.channel.send(`:no_entry_sign: I'm not playing anything.`);
         }
     }
 
@@ -81,11 +74,11 @@ export class AudioPlayer {
     public leave(msg?: Message) {
         if (msg) {
             msg.guild.member(this._client.user).voice.channel.leave();
-            this._logger.logLeave(msg.author);
+            msg.channel.send('Leaved voice channel.');
         } else {
-            if (this._client.guilds.cache.get(config.iboisGuildID).member(this._client.user).voice.channel) {
-                this._client.guilds.cache.get(config.iboisGuildID).member(this._client.user).voice.channel.leave();
-                this._logger.logLeave(this._client.user);
+            if (this._client.guilds.cache.get(config.pr1smGuildID).member(this._client.user).voice.channel) {
+                this._client.guilds.cache.get(config.pr1smGuildID).member(this._client.user).voice.channel.leave();
+                msg.channel.send('Leaved voice channel.');
             }
         }
     }
@@ -98,15 +91,13 @@ export class AudioPlayer {
         if (this._dispatcher) {
             if (this._dispatcher.paused) {
                 this._dispatcher.resume();
-                this._logger.logResume(msg)
-                this._statusMessage.resume();
+                msg.channel.send('resumed');
             } else {
                 this._dispatcher.pause();
-                this._logger.logPause(msg);
-                this._statusMessage.pause();
+                msg.channel.send('paused');
             }
         } else {
-            this._logger.logError(msg, `:no_entry_sign: I'm not playing anything.`);
+            msg.channel.send(`:no_entry_sign: I'm not playing anything.`);
         }
     }
 
@@ -118,9 +109,13 @@ export class AudioPlayer {
     public loop(msg: Message, entireQueue: boolean) {
         if (this._dispatcher) {
             this._musicQueue.changeLoop(entireQueue ? true : !this._musicQueue.loop.enabled, entireQueue);
-            this._logger.logLoop(msg, this._musicQueue.loop.enabled, entireQueue);
+            if (this._musicQueue.loop.enabled) {
+                msg.channel.send('Looped queue');
+            } else {
+                msg.channel.send('Disabled queue loop.');
+            }
         } else {
-            this._logger.logError(msg, `:no_entry_sign: I'm not playing anything.`);
+            msg.channel.send(`: no_entry_sign: I'm not playing anything.`);
         }
     }
 
@@ -148,19 +143,15 @@ export class AudioPlayer {
         })[0].url;
 
         if (audioUrl.startsWith('https://manifest')) {
-            miniget(audioUrl, (err: any, req: any, body: string) => {
-                let url = body.substring(body.indexOf('<BaseURL>') + 9, body.indexOf('</BaseURL>'));
-                this._play(url);
-            });
+            const body = await miniget(audioUrl).text();
+            let url = body.substring(body.indexOf('<BaseURL>') + 9, body.indexOf('</BaseURL>'));
+            this._play(url);
         } else {
             this._play(audioUrl);
         }
     }
 
     private async _play(url: string) {
-        if (!this._musicQueue.loop.enabled) {
-            this._logger.saveSong(this._musicQueue.getQueue()[0]);
-        }
         let audioStream = fs.createWriteStream('audioStream');
         miniget(url, { maxRedirects: 10 }).pipe(audioStream);
 
@@ -179,7 +170,7 @@ export class AudioPlayer {
         // read Stream from audioStream file and play it
         this._dispatcher = this._connection.play(fs.createReadStream('audioStream'), {
             bitrate: this._connection.channel.bitrate / 1000,
-            volume: 0.1
+            volume: 1
         });
 
         // if dispatcher ends, proceed to next song
