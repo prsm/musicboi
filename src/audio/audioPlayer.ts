@@ -74,11 +74,15 @@ export class AudioPlayer {
     public leave(msg?: Message) {
         if (msg) {
             msg.guild.member(this._client.user).voice.channel.leave();
-            msg.channel.send('Leaved voice channel.');
+            if (msg) {
+                msg.channel.send('Left voice channel.');
+            }
         } else {
             if (this._client.guilds.cache.get(config.pr1smGuildID).member(this._client.user).voice.channel) {
                 this._client.guilds.cache.get(config.pr1smGuildID).member(this._client.user).voice.channel.leave();
-                msg.channel.send('Leaved voice channel.');
+                if (msg) {
+                    msg.channel.send('Left voice channel.');
+                }
             }
         }
     }
@@ -136,6 +140,15 @@ export class AudioPlayer {
      */
     private async _loadAudioURL() {
         const info = await ytdl.getInfo(`https://youtu.be/${this._musicQueue.getQueue()[0].id}`);
+
+        console.log("================================================");
+        console.log(info.formats);
+        console.log(info.formats.filter((format: any) => {
+            return format.audioBitrate <= 128;
+        }).sort((a: any, b: any) => {
+            return b.audioBitrate - a.audioBitrate;
+        }).map(v => v.audioBitrate));
+
         const audioUrl = info.formats.filter((format: any) => {
             return format.audioBitrate <= 128;
         }).sort((a: any, b: any) => {
