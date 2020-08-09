@@ -141,14 +141,6 @@ export class AudioPlayer {
     private async _loadAudioURL() {
         const info = await ytdl.getInfo(`https://youtu.be/${this._musicQueue.getQueue()[0].id}`);
 
-        console.log("================================================");
-        console.log(info.formats);
-        console.log(info.formats.filter((format: any) => {
-            return format.audioBitrate <= 128;
-        }).sort((a: any, b: any) => {
-            return b.audioBitrate - a.audioBitrate;
-        }).map(v => v.audioBitrate));
-
         const audioUrl = info.formats.filter((format: any) => {
             return format.audioBitrate <= 128;
         }).sort((a: any, b: any) => {

@@ -44,7 +44,8 @@ export default class queueCommand implements BotCommand {
 
         const upcoming = this._generateQueueString(queue);
 
-        msg.channel.send(playnowString + upcoming);
+        msg.channel.send(playnowString);
+        msg.channel.send(upcoming);
     }
 
     private _generateQueueString(queue: Array<QueueSong>) {

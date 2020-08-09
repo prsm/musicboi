@@ -17,7 +17,7 @@
     "moment": "^2.27.0",
     "shuffle-array": "^1.0.1",
     "ytdl-core": "^3.2.0",
-    "ytpl": "^0.2.3"
+    "ytpl": "^0.2.4"
   },
   "devDependencies": {
     "@types/node": "^14.0.27",

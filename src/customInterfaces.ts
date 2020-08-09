@@ -28,7 +28,8 @@ export interface BotConfig {
     botToken: string,
     prefix: string,
     botID: string,
-    rootPath: string
+    rootPath: string,
+    playlistSongLimit: number
 }
 
 /**
