@@ -43,7 +43,7 @@ export default class playlistCommand implements BotCommand {
             msg.channel.send(`:no_entry_sign: ${msg.author.toString()}, please provide a valid youtube playlist link/id.`);
             return;
         }
-        if (!ytpl.validateURL(args[0])) {
+        if (!ytpl.validateID(args[0])) {
             msg.channel.send(`:no_entry_sign: ${msg.author.toString()}, please provide a valid youtube playlist link/id.`);
             return;
         }
